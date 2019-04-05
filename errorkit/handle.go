@@ -1,4 +1,4 @@
-package go_error
+package errorkit
 
 import (
 	"fmt"

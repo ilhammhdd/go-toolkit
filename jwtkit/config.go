@@ -1,4 +1,4 @@
-package go_jwt
+package jwtkit
 
 type ECDSA struct {
 	PublicKeyPath  string

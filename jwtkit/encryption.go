@@ -1,4 +1,4 @@
-package go_jwt
+package jwtkit
 
 import (
 	"crypto/ecdsa"

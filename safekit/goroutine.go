@@ -1,4 +1,4 @@
-package go_safe
+package safekit
 
 import (
 	"log"
