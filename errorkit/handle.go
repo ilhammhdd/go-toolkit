@@ -1,7 +1,7 @@
 package errorkit
 
 import (
-	"fmt"
+	"log"
 	"runtime"
 )
 
@@ -9,7 +9,7 @@ func ErrorHandled(err error) (ok bool) {
 	if err != nil {
 		stack := make([]byte, 1024*8)
 		stack = stack[:runtime.Stack(stack, false)]
-		fmt.Printf("ERROR: %s\n%s\n", err.Error(), stack)
+		log.Printf("ERROR: %s\n%s\n", err.Error(), stack)
 		return true
 	}
 
@@ -20,7 +20,7 @@ func PanicThenHandle(err error) {
 	defer func() {
 		stack := make([]byte, 1024*8)
 		stack = stack[:runtime.Stack(stack, false)]
-		fmt.Printf("INVOKE PANIC: %s\n%s\n", recover(), stack)
+		log.Printf("INVOKE PANIC: %s\n%s\n", recover(), stack)
 	}()
 
 	if err != nil {
@@ -33,7 +33,7 @@ func HandlePanic() {
 		if r := recover(); r != nil {
 			stack := make([]byte, 1024*8)
 			stack = stack[:runtime.Stack(stack, false)]
-			fmt.Printf("PANIC: %s\n%s\n", r, stack)
+			log.Printf("PANIC: %s\n%s\n", r, stack)
 		}
 	}()
 }
