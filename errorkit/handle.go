@@ -10,6 +10,7 @@ func ErrorHandled(err error) (ok bool) {
 		stack := make([]byte, 1024*8)
 		stack = stack[:runtime.Stack(stack, false)]
 		log.Printf("ERROR: %s\n%s\n", err.Error(), stack)
+		handlePanic()
 		return true
 	}
 
@@ -28,7 +29,7 @@ func PanicThenHandle(err error) {
 	}
 }
 
-func HandlePanic() {
+func handlePanic() {
 	defer func() {
 		if r := recover(); r != nil {
 			stack := make([]byte, 1024*8)
