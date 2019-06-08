@@ -22,6 +22,7 @@ type Job interface {
 type WorkerPool struct {
 	Job    chan Job
 	Work   chan func()
+	Worker chan Worker
 	Done   chan bool
 	PoolWG sync.WaitGroup
 	wg     sync.WaitGroup
@@ -32,9 +33,10 @@ func NewWorkerPool() *WorkerPool {
 
 	wp.Work = make(chan func())
 	wp.Job = make(chan Job)
+	wp.Worker = make(chan Worker)
 	wp.Done = make(chan bool)
 
-	wp.PoolWG.Add(2)
+	wp.PoolWG.Add(3)
 
 	Do(func() {
 		signals := make(chan os.Signal)
@@ -81,6 +83,30 @@ func NewWorkerPool() *WorkerPool {
 		}
 
 		close(wp.Work)
+		wp.PoolWG.Done()
+	})
+
+	Do(func() {
+		signals := make(chan os.Signal)
+		signal.Notify(signals, os.Interrupt)
+
+	WorkerLoop:
+		for {
+			select {
+			case worker := <-wp.Worker:
+				wp.wg.Add(1)
+				Do(func() {
+					worker.Work()
+				})
+				wp.wg.Done()
+			case <-wp.Done:
+				break WorkerLoop
+			case <-signals:
+				break WorkerLoop
+			}
+		}
+
+		close(wp.Worker)
 		wp.PoolWG.Done()
 	})
 
