@@ -122,7 +122,7 @@ func (enc *ECDSA) gettingPublicFromPEM(string) (*ecdsa.PublicKey, error) {
 
 	publicPemBlock, _ := pem.Decode(publicKeyData)
 	if publicPemBlock == nil || publicPemBlock.Type != "E256 PUBLIC KEY" {
-		return nil, errors.New("Failed to decode PEM block containing public key")
+		return nil, errors.New("failed to decode PEM block containing public key")
 	}
 
 	parsedPublicKey, err := x509.ParsePKIXPublicKey(publicPemBlock.Bytes)
@@ -150,7 +150,7 @@ func (enc *ECDSA) gettingPrivateFromPEM(string) (*ecdsa.PrivateKey, error) {
 
 	privatePemBlock, _ := pem.Decode(privateKeyData)
 	if privatePemBlock == nil || privatePemBlock.Type != "E256 PRIVATE KEY" {
-		return nil, errors.New("Failed to decode PEM block containing private key")
+		return nil, errors.New("failed to decode PEM block containing private key")
 	}
 
 	privateKey, err := x509.ParseECPrivateKey(privatePemBlock.Bytes)

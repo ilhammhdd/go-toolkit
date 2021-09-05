@@ -39,7 +39,7 @@ func NewWorkerPool() *WorkerPool {
 	wp.PoolWG.Add(3)
 
 	Do(func() {
-		signals := make(chan os.Signal)
+		signals := make(chan os.Signal, 1)
 		signal.Notify(signals, os.Interrupt)
 
 	JobLoop:
@@ -63,7 +63,7 @@ func NewWorkerPool() *WorkerPool {
 	})
 
 	Do(func() {
-		signals := make(chan os.Signal)
+		signals := make(chan os.Signal, 1)
 		signal.Notify(signals, os.Interrupt)
 
 	WorkLoop:
@@ -87,7 +87,7 @@ func NewWorkerPool() *WorkerPool {
 	})
 
 	Do(func() {
-		signals := make(chan os.Signal)
+		signals := make(chan os.Signal, 1)
 		signal.Notify(signals, os.Interrupt)
 
 	WorkerLoop:

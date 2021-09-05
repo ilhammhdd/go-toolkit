@@ -91,7 +91,7 @@ func (je JWTExpiration) GenerateSignedJWTString(encrypt *ECDSA, audience string,
 	}
 
 	if !ecdsa.Verify(publicKey, hashed, r, s) {
-		return "", errors.New("Generated hash, r, and s fails to verify")
+		return "", errors.New("generated hash, r, and s fails to verify")
 	}
 
 	jwt.Signature = &Signature{}
@@ -109,7 +109,7 @@ func (je JWTExpiration) GenerateSignedJWTString(encrypt *ECDSA, audience string,
 	return signedJWT, nil
 }
 
-func hashedFromJWT(jwt *JWT) ([]byte, error) {
+func HashedFromJWT(jwt *JWT) ([]byte, error) {
 
 	jsonHeader, err := json.Marshal(jwt.Header)
 	if err != nil {
@@ -168,7 +168,7 @@ func VerifyJWTString(encrypt *ECDSA, j JWTString) (bool, error) {
 
 	signature.Hashed[0] ^= 0xff
 	if ecdsa.Verify(publicKey, signature.Hashed, signature.R, signature.S) {
-		return false, errors.New("Verify always true")
+		return false, errors.New("verify always true")
 	}
 
 	return true, nil
