@@ -25,7 +25,6 @@ type WorkerPool struct {
 	Worker chan Worker
 	Done   chan bool
 	PoolWG sync.WaitGroup
-	wg     sync.WaitGroup
 }
 
 func NewWorkerPool() *WorkerPool {
@@ -46,10 +45,8 @@ func NewWorkerPool() *WorkerPool {
 		for {
 			select {
 			case job := <-wp.Job:
-				wp.wg.Add(1)
 				Do(func() {
 					job.Handle(job.Work())
-					wp.wg.Done()
 				})
 			case <-wp.Done:
 				break JobLoop
@@ -70,11 +67,9 @@ func NewWorkerPool() *WorkerPool {
 		for {
 			select {
 			case work := <-wp.Work:
-				wp.wg.Add(1)
 				Do(func() {
 					work()
 				})
-				wp.wg.Done()
 			case <-wp.Done:
 				break WorkLoop
 			case <-signals:
@@ -94,11 +89,9 @@ func NewWorkerPool() *WorkerPool {
 		for {
 			select {
 			case worker := <-wp.Worker:
-				wp.wg.Add(1)
 				Do(func() {
 					worker.Work()
 				})
-				wp.wg.Done()
 			case <-wp.Done:
 				break WorkerLoop
 			case <-signals:
