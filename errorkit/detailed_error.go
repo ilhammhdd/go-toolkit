@@ -37,9 +37,9 @@ func (de *DetailedError) Error() string {
 	}
 	switch {
 	case de.WrappedErr != nil && !de.Flow:
-		return fmt.Sprintf("date_time: %s internal: %t call_trace: %s desc: %s error: %s", de.DateTime, de.Flow, de.CallTrace, de.Desc, de.WrappedErr.Error())
+		return fmt.Sprintf("date_time: %s flow: %t call_trace: %s desc: %s error: %s", de.DateTime, de.Flow, de.CallTrace, de.Desc, de.WrappedErr.Error())
 	case de.WrappedErr == nil && !de.Flow:
-		return fmt.Sprintf("date_time: %s internal: %t call_trace: %s desc: %s", de.DateTime, de.Flow, de.CallTrace, de.Desc)
+		return fmt.Sprintf("date_time: %s flow: %t call_trace: %s desc: %s", de.DateTime, de.Flow, de.CallTrace, de.Desc)
 	case de.Flow:
 		return de.Desc
 	default:
@@ -91,6 +91,7 @@ func (de *DetailedError) UnmarshalJSON(jsonData []byte) error {
 	return json.Unmarshal(jsonData, &result)
 }
 
+// NewDetailedError arg flow notating whether the cause is something from business flow or logic flow, or algorithmic one
 func NewDetailedError(flow bool, callTrace string, wrappedErr error, errDescConst ErrDescConst, descGenerator DescGenerator, args ...string) *DetailedError {
 	return &DetailedError{time.Now().UTC(), flow, callTrace, wrappedErr, errDescConst, descGenerator.GenerateDesc(errDescConst, args...), false}
 }
