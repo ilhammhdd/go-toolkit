@@ -21,8 +21,9 @@ func (dgf DescGeneratorFunc) GenerateDesc(edc ErrDescConst, args ...string) stri
 }
 
 type DetailedError struct {
-	DateTime     time.Time
-	Internal     bool
+	DateTime time.Time
+	// Notating whether the cause is something from business flow or logic flow, or algorithmic one
+	Flow         bool
 	CallTrace    string
 	WrappedErr   error
 	ErrDescConst ErrDescConst
@@ -34,10 +35,15 @@ func (de *DetailedError) Error() string {
 	if de.DateTime.Format(time.RFC3339Nano) == "0001-01-01T00:00:00Z" {
 		de.DateTime = time.Now().UTC()
 	}
-	if de.WrappedErr != nil {
-		return fmt.Sprintf("date_time: %s internal: %t call_trace: %s desc: %s error: %s", de.DateTime, de.Internal, de.CallTrace, de.Desc, de.WrappedErr.Error())
-	} else {
-		return fmt.Sprintf("date_time: %s internal: %t call_trace: %s desc: %s", de.DateTime, de.Internal, de.CallTrace, de.Desc)
+	switch {
+	case de.WrappedErr != nil && !de.Flow:
+		return fmt.Sprintf("date_time: %s internal: %t call_trace: %s desc: %s error: %s", de.DateTime, de.Flow, de.CallTrace, de.Desc, de.WrappedErr.Error())
+	case de.WrappedErr == nil && !de.Flow:
+		return fmt.Sprintf("date_time: %s internal: %t call_trace: %s desc: %s", de.DateTime, de.Flow, de.CallTrace, de.Desc)
+	case de.Flow:
+		return de.Desc
+	default:
+		return ""
 	}
 }
 
@@ -48,7 +54,7 @@ func (de *DetailedError) Is(target error) bool {
 	if !errors.As(target, &targetAsDetailedError) {
 		return false
 	}
-	return de.Internal == targetAsDetailedError.Internal && de.CallTrace == targetAsDetailedError.CallTrace && de.Desc == targetAsDetailedError.Desc
+	return de.Flow == targetAsDetailedError.Flow && de.CallTrace == targetAsDetailedError.CallTrace && de.Desc == targetAsDetailedError.Desc
 }
 
 func (de *DetailedError) IsWrappedErrNotNilThenLog() bool {
@@ -59,13 +65,13 @@ func (de *DetailedError) IsWrappedErrNotNilThenLog() bool {
 	return false
 }
 
-type externalStruct struct {
+type flowStruct struct {
 	Desc string `json:"desc"`
 }
 
-type internalStruct struct {
+type nonFlowStruct struct {
 	DateTime     time.Time    `json:"date_time"`
-	Internal     bool         `json:"internal"`
+	Flow         bool         `json:"flow"`
 	CallTrace    string       `json:"call_trace"`
 	WrappedErr   error        `json:"wrapped_err,omitempty"`
 	ErrDescConst ErrDescConst `json:"err_desc_const,omitempty"`
@@ -74,10 +80,10 @@ type internalStruct struct {
 }
 
 func (de DetailedError) MarshalJSON() ([]byte, error) {
-	if de.Internal {
-		return json.Marshal(internalStruct(de))
+	if de.Flow {
+		return json.Marshal(flowStruct{de.Desc})
 	}
-	return json.Marshal(externalStruct{de.Desc})
+	return json.Marshal(nonFlowStruct(de))
 }
 
 func (de *DetailedError) UnmarshalJSON(jsonData []byte) error {

@@ -80,7 +80,7 @@ func TestDetailedError(t *testing.T) {
 	t.Logf("%s", response3Json)
 
 	external1 := internal5
-	external1.Internal = false
+	external1.Flow = false
 	response4 := Response{Data: "this is the data4", Errors: []error{external1}}
 	response4Json, err := json.Marshal(response4)
 	if err != nil {
