@@ -96,17 +96,13 @@ func NewDetailedError(flow bool, callTrace string, wrappedErr error, errDescCons
 	return &DetailedError{time.Now().UTC(), flow, callTrace, wrappedErr, errDescConst, descGenerator.GenerateDesc(errDescConst, args...), false}
 }
 
-func IsNotNilThenLog(err error) (*DetailedError, bool) {
-	if err != nil {
-		if detailedErr, ok := err.(*DetailedError); ok {
-			if !detailedErr.logged {
-				log.Printf("\n%s", detailedErr.Error())
-				detailedErr.logged = true
-			}
-			return detailedErr, true
+func IsNotNilThenLog(detailedErr *DetailedError) bool {
+	if detailedErr != nil {
+		if !detailedErr.logged {
+			log.Printf("\n%s", detailedErr.Error())
+			detailedErr.logged = true
 		}
-		log.Printf("\ndate_time: %s error: %s", time.Now().UTC(), err.Error())
-		return nil, true
+		return true
 	}
-	return nil, false
+	return false
 }

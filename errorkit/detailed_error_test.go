@@ -92,7 +92,5 @@ func TestDetailedError(t *testing.T) {
 	IsNotNilThenLog(detailedErr1)
 
 	detailedErr2 := NewDetailedError(true, callTraceFunc, nil, Err1stLayerInvalidType, DescGeneration("detailed internal error 2"))
-	err1 := errors.New("error 1")
 	IsNotNilThenLog(detailedErr2)
-	IsNotNilThenLog(err1)
 }
