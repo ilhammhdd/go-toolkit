@@ -91,8 +91,8 @@ func (de *DetailedError) UnmarshalJSON(jsonData []byte) error {
 	return json.Unmarshal(jsonData, &result)
 }
 
-func NewDetailedError(internal bool, callTrace string, wrappedErr error, errDescConst ErrDescConst, descGenerator DescGenerator, args ...string) *DetailedError {
-	return &DetailedError{time.Now().UTC(), internal, callTrace, wrappedErr, errDescConst, descGenerator.GenerateDesc(errDescConst, args...), false}
+func NewDetailedError(flow bool, callTrace string, wrappedErr error, errDescConst ErrDescConst, descGenerator DescGenerator, args ...string) *DetailedError {
+	return &DetailedError{time.Now().UTC(), flow, callTrace, wrappedErr, errDescConst, descGenerator.GenerateDesc(errDescConst, args...), false}
 }
 
 func IsNotNilThenLog(err error) (*DetailedError, bool) {
