@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type ErrDescConst uint
@@ -22,6 +24,7 @@ func (dgf DescGeneratorFunc) GenerateDesc(edc ErrDescConst, args ...string) stri
 
 type DetailedError struct {
 	DateTime time.Time
+	UUID     string
 	// Notating whether the cause is something from business flow or logic flow, or algorithmic one
 	Flow         bool
 	CallTrace    string
@@ -37,9 +40,9 @@ func (de *DetailedError) Error() string {
 	}
 	switch {
 	case de.WrappedErr != nil && !de.Flow:
-		return fmt.Sprintf("date_time: %s flow: %t call_trace: %s desc: %s error: %s", de.DateTime, de.Flow, de.CallTrace, de.Desc, de.WrappedErr.Error())
+		return fmt.Sprintf("date_time: %s uuid: %s flow: %t call_trace: %s desc: %s error: %s", de.DateTime, de.UUID, de.Flow, de.CallTrace, de.Desc, de.WrappedErr.Error())
 	case de.WrappedErr == nil && !de.Flow:
-		return fmt.Sprintf("date_time: %s flow: %t call_trace: %s desc: %s", de.DateTime, de.Flow, de.CallTrace, de.Desc)
+		return fmt.Sprintf("date_time: %s uuid: %s flow: %t call_trace: %s desc: %s", de.DateTime, de.UUID, de.Flow, de.CallTrace, de.Desc)
 	case de.Flow:
 		return de.Desc
 	default:
@@ -66,11 +69,13 @@ func (de *DetailedError) IsWrappedErrNotNilThenLog() bool {
 }
 
 type flowStruct struct {
+	UUID string `json:"uuid"`
 	Desc string `json:"desc"`
 }
 
 type nonFlowStruct struct {
 	DateTime     time.Time    `json:"date_time"`
+	UUID         string       `json:"uuid"`
 	Flow         bool         `json:"flow"`
 	CallTrace    string       `json:"call_trace"`
 	WrappedErr   error        `json:"wrapped_err,omitempty"`
@@ -81,7 +86,7 @@ type nonFlowStruct struct {
 
 func (de DetailedError) MarshalJSON() ([]byte, error) {
 	if de.Flow {
-		return json.Marshal(flowStruct{de.Desc})
+		return json.Marshal(flowStruct{de.UUID, de.Desc})
 	}
 	return json.Marshal(nonFlowStruct(de))
 }
@@ -93,7 +98,12 @@ func (de *DetailedError) UnmarshalJSON(jsonData []byte) error {
 
 // NewDetailedError arg flow notating whether the cause is something from business flow or logic flow, or algorithmic one
 func NewDetailedError(flow bool, callTrace string, wrappedErr error, errDescConst ErrDescConst, descGenerator DescGenerator, args ...string) *DetailedError {
-	return &DetailedError{time.Now().UTC(), flow, callTrace, wrappedErr, errDescConst, descGenerator.GenerateDesc(errDescConst, args...), false}
+	uuidRand, err := uuid.NewRandom()
+	if err != nil {
+		log.Println("error while generating random uuid")
+		return nil
+	}
+	return &DetailedError{time.Now().UTC(), uuidRand.String(), flow, callTrace, wrappedErr, errDescConst, descGenerator.GenerateDesc(errDescConst, args...), false}
 }
 
 func IsNotNilThenLog(detailedErr *DetailedError) bool {
