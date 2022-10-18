@@ -10,16 +10,14 @@ import (
 	"github.com/google/uuid"
 )
 
-type ErrDescConst uint
-
-type DescGenerator interface {
-	GenerateDesc(ErrDescConst, ...string) string
+type ErrDescGenerator interface {
+	GenerateDesc(uint, ...string) string
 }
 
-type DescGeneratorFunc func(edc ErrDescConst, args ...string) string
+type ErrDescGeneratorFunc func(errorDescConst uint, args ...string) string
 
-func (dgf DescGeneratorFunc) GenerateDesc(edc ErrDescConst, args ...string) string {
-	return dgf(edc, args...)
+func (dgf ErrDescGeneratorFunc) GenerateDesc(errorDescConst uint, args ...string) string {
+	return dgf(errorDescConst, args...)
 }
 
 type DetailedError struct {
@@ -29,7 +27,7 @@ type DetailedError struct {
 	Flow         bool
 	CallTrace    string
 	WrappedErr   error
-	ErrDescConst ErrDescConst
+	ErrDescConst uint
 	Desc         string
 	logged       bool
 }
@@ -74,14 +72,14 @@ type flowStruct struct {
 }
 
 type nonFlowStruct struct {
-	DateTime     time.Time    `json:"date_time"`
-	UUID         string       `json:"uuid"`
-	Flow         bool         `json:"flow"`
-	CallTrace    string       `json:"call_trace"`
-	WrappedErr   error        `json:"wrapped_err,omitempty"`
-	ErrDescConst ErrDescConst `json:"err_desc_const,omitempty"`
-	Desc         string       `json:"desc"`
-	logged       bool         `json:"-"`
+	DateTime     time.Time `json:"date_time"`
+	UUID         string    `json:"uuid"`
+	Flow         bool      `json:"flow"`
+	CallTrace    string    `json:"call_trace"`
+	WrappedErr   error     `json:"wrapped_err,omitempty"`
+	ErrDescConst uint      `json:"err_desc_const,omitempty"`
+	Desc         string    `json:"desc"`
+	logged       bool      `json:"-"`
 }
 
 func (de DetailedError) MarshalJSON() ([]byte, error) {
@@ -97,7 +95,7 @@ func (de *DetailedError) UnmarshalJSON(jsonData []byte) error {
 }
 
 // NewDetailedError arg flow notating whether the cause is something from business flow or logic flow, or algorithmic one
-func NewDetailedError(flow bool, callTrace string, wrappedErr error, errDescConst ErrDescConst, descGenerator DescGenerator, args ...string) *DetailedError {
+func NewDetailedError(flow bool, callTrace string, wrappedErr error, errDescConst uint, descGenerator ErrDescGenerator, args ...string) *DetailedError {
 	uuidRand, err := uuid.NewRandom()
 	if err != nil {
 		log.Println("error while generating random uuid")

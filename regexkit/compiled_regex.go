@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	RegexEmail = iota
+	RegexEmail uint = iota
 	RegexAlphanumeric
 	RegexNotEmpty
 	RegexURL
@@ -20,10 +20,11 @@ const (
 	RegexIPv4
 	RegexIPv4TCPPortRange
 	RegexDateTimeRFC3339
+	ParamNotExists
 	LastRegexIota
 )
 
-var Regex map[int]string = map[int]string{
+var Regex map[uint]string = map[uint]string{
 	RegexEmail:              `^[A-Za-z0-9](([_\.\-]?[a-zA-Z0-9]+)*)@([A-Za-z0-9]+)(([\.\-]?[a-zA-Z0-9]+)*)\.([A-Za-z]{2,})$`,
 	RegexAlphanumeric:       `^[a-zA-Z0-9]+$`,
 	RegexNotEmpty:           `.*\S.*`,
@@ -39,10 +40,10 @@ var Regex map[int]string = map[int]string{
 	RegexDateTimeRFC3339:    `^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[\+-]\d{2}:\d{2})?)$`,
 }
 
-var RegexpCompiled map[int]*regexp.Regexp
+var RegexpCompiled map[uint]*regexp.Regexp
 
-func CompileAllRegex(otherRegex map[int]string) error {
-	RegexpCompiled = make(map[int]*regexp.Regexp)
+func CompileAllRegex(otherRegex map[uint]string) error {
+	RegexpCompiled = make(map[uint]*regexp.Regexp)
 	var err error
 
 	regexEmailComp, err := regexp.Compile(Regex[RegexEmail])

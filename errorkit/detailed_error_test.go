@@ -10,23 +10,23 @@ import (
 const callTraceFileErrorTest = "/errorkit/error_test.go"
 
 const (
-	Err1stLayerNotFound ErrDescConst = iota
+	Err1stLayerNotFound uint = iota
 	Err1stLayerInvalidType
 	LastErr1stLayer
 )
 
 const (
-	Err2ndLayerDriverBusy ErrDescConst = iota + LastErr1stLayer
+	Err2ndLayerDriverBusy uint = iota + LastErr1stLayer
 	LastErr2ndLayer
 )
 
 const (
-	Err3rdLayerClientTimeout ErrDescConst = iota + LastErr2ndLayer
+	Err3rdLayerClientTimeout uint = iota + LastErr2ndLayer
 )
 
 type DescGeneration string
 
-func (dg DescGeneration) GenerateDesc(edc ErrDescConst, args ...string) string {
+func (dg DescGeneration) GenerateDesc(edc uint, args ...string) string {
 	switch edc {
 	case Err1stLayerNotFound:
 		return fmt.Sprintf("%s not found", dg)
