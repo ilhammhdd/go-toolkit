@@ -2,8 +2,6 @@ package sqlkit
 
 import (
 	"database/sql"
-
-	"github.com/ilhammhdd/go-toolkit/errorkit"
 )
 
 type DBOperation struct {
@@ -12,7 +10,9 @@ type DBOperation struct {
 
 func (dbo DBOperation) Command(stmt string, args ...interface{}) (sql.Result, error) {
 	err := dbo.DB.Ping()
-	errorkit.ErrorHandled(err, stackSize)
+	if err != nil {
+		return nil, err
+	}
 
 	outStmt, err := dbo.DB.Prepare(stmt)
 	defer outStmt.Close()
@@ -30,11 +30,15 @@ func (dbo DBOperation) Command(stmt string, args ...interface{}) (sql.Result, er
 
 func (dbo DBOperation) Query(stmt string, args ...interface{}) (*sql.Rows, error) {
 	err := dbo.DB.Ping()
-	errorkit.ErrorHandled(err, stackSize)
+	if err != nil {
+		return nil, err
+	}
 
 	outStmt, err := dbo.DB.Prepare(stmt)
 	defer outStmt.Close()
-	errorkit.ErrorHandled(err, stackSize)
+	if err != nil {
+		return nil, err
+	}
 
 	rows, err := outStmt.Query(args...)
 	if err != nil {
@@ -46,7 +50,9 @@ func (dbo DBOperation) Query(stmt string, args ...interface{}) (*sql.Rows, error
 
 func (dbo DBOperation) QueryRow(stmt string, args ...interface{}) (*sql.Row, error) {
 	err := dbo.DB.Ping()
-	errorkit.ErrorHandled(err, stackSize)
+	if err != nil {
+		return nil, err
+	}
 
 	outStmt, err := dbo.DB.Prepare(stmt)
 	defer outStmt.Close()
@@ -61,7 +67,9 @@ func (dbo DBOperation) QueryRow(stmt string, args ...interface{}) (*sql.Row, err
 
 func (dbo DBOperation) QueryRowsToMap(stmt string, args ...interface{}) (*[]*map[string]interface{}, error) {
 	err := dbo.DB.Ping()
-	errorkit.ErrorHandled(err, stackSize)
+	if err != nil {
+		return nil, err
+	}
 
 	outStmt, err := dbo.DB.Prepare(stmt)
 	defer outStmt.Close()

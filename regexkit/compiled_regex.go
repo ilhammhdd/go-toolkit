@@ -2,8 +2,6 @@ package regexkit
 
 import (
 	"regexp"
-
-	"github.com/ilhammhdd/go-toolkit/errorkit"
 )
 
 const (
@@ -20,7 +18,6 @@ const (
 	RegexIPv4
 	RegexIPv4TCPPortRange
 	RegexDateTimeRFC3339
-	ParamNotExists
 	LastRegexIota
 )
 
@@ -47,79 +44,79 @@ func CompileAllRegex(otherRegex map[uint]string) error {
 	var err error
 
 	regexEmailComp, err := regexp.Compile(Regex[RegexEmail])
-	if errorkit.ErrorHandled(err, stackSize) {
+	if err != nil {
 		return err
 	}
 	RegexpCompiled[RegexEmail] = regexEmailComp
 
 	regexAlphanumericComp, err := regexp.Compile(Regex[RegexAlphanumeric])
-	if errorkit.ErrorHandled(err, stackSize) {
+	if err != nil {
 		return err
 	}
 	RegexpCompiled[RegexAlphanumeric] = regexAlphanumericComp
 
 	regexNotEmptyComp, err := regexp.Compile(Regex[RegexNotEmpty])
-	if errorkit.ErrorHandled(err, stackSize) {
+	if err != nil {
 		return err
 	}
 	RegexpCompiled[RegexNotEmpty] = regexNotEmptyComp
 
 	regexURLComp, err := regexp.Compile(Regex[RegexURL])
-	if errorkit.ErrorHandled(err, stackSize) {
+	if err != nil {
 		return err
 	}
 	RegexpCompiled[RegexURL] = regexURLComp
 
 	regexJWTComp, err := regexp.Compile(Regex[RegexJWT])
-	if errorkit.ErrorHandled(err, stackSize) {
+	if err != nil {
 		return err
 	}
 	RegexpCompiled[RegexJWT] = regexJWTComp
 
 	regexNumberComp, err := regexp.Compile(Regex[RegexNumber])
-	if errorkit.ErrorHandled(err, stackSize) {
+	if err != nil {
 		return err
 	}
 	RegexpCompiled[RegexNumber] = regexNumberComp
 
 	regexLatitudeComp, err := regexp.Compile(Regex[RegexLatitude])
-	if errorkit.ErrorHandled(err, stackSize) {
+	if err != nil {
 		return err
 	}
 	RegexpCompiled[RegexLatitude] = regexLatitudeComp
 
 	regexLongitudeComp, err := regexp.Compile(Regex[RegexLongitude])
-	if errorkit.ErrorHandled(err, stackSize) {
+	if err != nil {
 		return err
 	}
 	RegexpCompiled[RegexLongitude] = regexLongitudeComp
 
 	regexUUIDV4Comp, err := regexp.Compile(Regex[RegexUUIDV4])
-	if errorkit.ErrorHandled(err, stackSize) {
+	if err != nil {
 		return err
 	}
 	RegexpCompiled[RegexUUIDV4] = regexUUIDV4Comp
 
 	regexCommonUnitOfLengthComp, err := regexp.Compile(Regex[RegexCommonUnitOfLength])
-	if errorkit.ErrorHandled(err, stackSize) {
+	if err != nil {
 		return err
 	}
 	RegexpCompiled[RegexCommonUnitOfLength] = regexCommonUnitOfLengthComp
 
 	regexIPv4Comp, err := regexp.Compile(Regex[RegexIPv4])
-	if errorkit.ErrorHandled(err, stackSize) {
+	if err != nil {
 		return err
 	}
 	RegexpCompiled[RegexIPv4] = regexIPv4Comp
 
 	regexIPv4TCPPortRangeComp, err := regexp.Compile(Regex[RegexIPv4TCPPortRange])
-	if errorkit.ErrorHandled(err, stackSize) {
+	if err != nil {
 		return err
 	}
 	RegexpCompiled[RegexIPv4TCPPortRange] = regexIPv4TCPPortRangeComp
 
 	regexDateTimeRFC3339Comp, err := regexp.Compile(Regex[RegexDateTimeRFC3339])
-	if errorkit.ErrorHandled(err, stackSize) {
+	if err != nil {
 		return err
 	}
 	RegexpCompiled[RegexDateTimeRFC3339] = regexDateTimeRFC3339Comp
@@ -129,7 +126,9 @@ func CompileAllRegex(otherRegex map[uint]string) error {
 			continue
 		}
 		regexCompiled, err := regexp.Compile(val)
-		errorkit.ErrorHandled(err, stackSize)
+		if err != nil {
+			return err
+		}
 		RegexpCompiled[key] = regexCompiled
 	}
 

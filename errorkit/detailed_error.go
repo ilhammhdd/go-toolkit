@@ -10,6 +10,12 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	FlowErrHttpHeaderParamNotExists uint = iota
+	FlowErrURLQueryNotExists
+	DetailedErrLastIota
+)
+
 type ErrDescGenerator interface {
 	GenerateDesc(uint, ...string) string
 }

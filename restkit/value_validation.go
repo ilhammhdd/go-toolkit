@@ -21,7 +21,7 @@ func (hpv *HeaderParamValidation) Validate(errDescGen errorkit.ErrDescGenerator)
 	for param, regexConst := range hpv.RegexRules {
 		if values, ok := hpv.Header[param]; !ok {
 			valid = false
-			allErrs[param] = []string{errDescGen.GenerateDesc(regexkit.ParamNotExists, param)}
+			allErrs[param] = []string{errDescGen.GenerateDesc(errorkit.FlowErrHttpHeaderParamNotExists, param)}
 		} else {
 			errs := make([]string, len(values))
 			for idx, value := range values {
@@ -38,43 +38,36 @@ func (hpv *HeaderParamValidation) Validate(errDescGen errorkit.ErrDescGenerator)
 	return &allErrs, valid
 }
 
-type URLParamValidationRegexMsgGenerator interface {
-	regexkit.RegexNoMatchMsgGenerator
-	GenerateNoURLParamMsg() string
-}
-
-const ErrNoURLParams uint = 0
-
-type URLParamValidation struct {
+type URLQueryValidation struct {
 	RegexRules map[string]uint
 	Values     url.Values
 }
 
-func (upv *URLParamValidation) Validate(errDescGen errorkit.ErrDescGenerator) (*map[string][]string, bool) {
+func (upv *URLQueryValidation) Validate(errDescGen errorkit.ErrDescGenerator) (*map[string][]string, bool) {
 	var allErrs map[string][]string = make(map[string][]string)
 
 	if len(upv.Values) == 0 {
-		allErrs["all"] = []string{errDescGen.GenerateDesc(ErrNoURLParams)}
+		allErrs["all"] = []string{errDescGen.GenerateDesc(errorkit.FlowErrURLQueryNotExists)}
 		return &allErrs, false
 	}
 
 	valid := true
 
-	for param, regexConst := range upv.RegexRules {
-		vals, ok := upv.Values[param]
+	for query, regexConst := range upv.RegexRules {
+		vals, ok := upv.Values[query]
 		if !ok && len(upv.Values) > 0 {
 			valid = false
-			allErrs[param] = []string{errDescGen.GenerateDesc(regexConst, param)}
+			allErrs[query] = []string{errDescGen.GenerateDesc(regexConst, query)}
 		} else {
 			errs := make([]string, len(vals))
 			for idx, val := range vals {
 				regexOk := regexkit.RegexpCompiled[regexConst].Match([]byte(val))
 				if !regexOk {
 					valid = false
-					errs[idx] = errDescGen.GenerateDesc(regexConst, param, fmt.Sprint(idx))
+					errs[idx] = errDescGen.GenerateDesc(regexConst, query, fmt.Sprint(idx))
 				}
 			}
-			allErrs[param] = errs
+			allErrs[query] = errs
 		}
 	}
 
