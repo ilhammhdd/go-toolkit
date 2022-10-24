@@ -14,21 +14,21 @@ type HeaderParamValidation struct {
 	Header     http.Header
 }
 
-func (hpv *HeaderParamValidation) Validate(errDescGen errorkit.ErrDescGenerator) (*map[string][]string, bool) {
+func (hpv *HeaderParamValidation) Validate(detailedErrDescGen, regexErrDescGen errorkit.ErrDescGenerator) (*map[string][]string, bool) {
 	valid := true
 	var allErrs map[string][]string = make(map[string][]string)
 
 	for param, regexConst := range hpv.RegexRules {
 		if values, ok := hpv.Header[param]; !ok {
 			valid = false
-			allErrs[param] = []string{errDescGen.GenerateDesc(errorkit.FlowErrHttpHeaderParamNotExists, param)}
+			allErrs[param] = []string{detailedErrDescGen.GenerateDesc(errorkit.FlowErrHttpHeaderParamNotExists, param)}
 		} else {
 			errs := make([]string, len(values))
 			for idx, value := range values {
 				regexOk := regexkit.RegexpCompiled[regexConst].Match([]byte(value))
 				if !regexOk {
 					valid = false
-					errs[idx] = errDescGen.GenerateDesc(regexConst, param, fmt.Sprint(idx))
+					errs[idx] = regexErrDescGen.GenerateDesc(regexConst, param, fmt.Sprint(idx))
 				}
 			}
 			allErrs[param] = errs
@@ -43,11 +43,11 @@ type URLQueryValidation struct {
 	Values     url.Values
 }
 
-func (upv *URLQueryValidation) Validate(errDescGen errorkit.ErrDescGenerator) (*map[string][]string, bool) {
+func (upv *URLQueryValidation) Validate(detailedErrDescGen, regexErrDescGen errorkit.ErrDescGenerator) (*map[string][]string, bool) {
 	var allErrs map[string][]string = make(map[string][]string)
 
 	if len(upv.Values) == 0 {
-		allErrs["all"] = []string{errDescGen.GenerateDesc(errorkit.FlowErrURLQueryNotExists)}
+		allErrs["all"] = []string{detailedErrDescGen.GenerateDesc(errorkit.FlowErrURLQueryNotExists)}
 		return &allErrs, false
 	}
 
@@ -57,14 +57,14 @@ func (upv *URLQueryValidation) Validate(errDescGen errorkit.ErrDescGenerator) (*
 		vals, ok := upv.Values[query]
 		if !ok && len(upv.Values) > 0 {
 			valid = false
-			allErrs[query] = []string{errDescGen.GenerateDesc(regexConst, query)}
+			allErrs[query] = []string{regexErrDescGen.GenerateDesc(regexConst, query)}
 		} else {
 			errs := make([]string, len(vals))
 			for idx, val := range vals {
 				regexOk := regexkit.RegexpCompiled[regexConst].Match([]byte(val))
 				if !regexOk {
 					valid = false
-					errs[idx] = errDescGen.GenerateDesc(regexConst, query, fmt.Sprint(idx))
+					errs[idx] = regexErrDescGen.GenerateDesc(regexConst, query, fmt.Sprint(idx))
 				}
 			}
 			allErrs[query] = errs
