@@ -15,10 +15,10 @@ func (dbo DBOperation) Command(stmt string, args ...interface{}) (sql.Result, er
 	}
 
 	outStmt, err := dbo.DB.Prepare(stmt)
-	defer outStmt.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer outStmt.Close()
 
 	result, err := outStmt.Exec(args...)
 	if err != nil {
@@ -35,10 +35,10 @@ func (dbo DBOperation) Query(stmt string, args ...interface{}) (*sql.Rows, error
 	}
 
 	outStmt, err := dbo.DB.Prepare(stmt)
-	defer outStmt.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer outStmt.Close()
 
 	rows, err := outStmt.Query(args...)
 	if err != nil {
@@ -55,10 +55,10 @@ func (dbo DBOperation) QueryRow(stmt string, args ...interface{}) (*sql.Row, err
 	}
 
 	outStmt, err := dbo.DB.Prepare(stmt)
-	defer outStmt.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer outStmt.Close()
 
 	resultRow := outStmt.QueryRow(args...)
 
@@ -72,16 +72,16 @@ func (dbo DBOperation) QueryRowsToMap(stmt string, args ...interface{}) (*[]*map
 	}
 
 	outStmt, err := dbo.DB.Prepare(stmt)
-	defer outStmt.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer outStmt.Close()
 
 	rows, err := outStmt.Query(args...)
-	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	cols, err := rows.Columns()
 	if err != nil {

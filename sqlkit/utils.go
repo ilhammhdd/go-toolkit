@@ -1,7 +1,5 @@
 package sqlkit
 
-const stackSize = 1024 * 8
-
 func GeneratePlaceHolder(n uint16) []byte {
 	if n == 0 {
 		return nil
