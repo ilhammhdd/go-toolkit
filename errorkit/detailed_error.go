@@ -43,12 +43,14 @@ func (de *DetailedError) Error() string {
 		de.DateTime = time.Now().UTC()
 	}
 	switch {
-	case de.WrappedErr != nil && !de.Flow:
+	case !de.Flow && de.WrappedErr != nil:
 		return fmt.Sprintf("date_time: %s uuid: %s flow: %t call_trace: %s desc: %s error: %s", de.DateTime, de.UUID, de.Flow, de.CallTrace, de.Desc, de.WrappedErr.Error())
-	case de.WrappedErr == nil && !de.Flow:
+	case !de.Flow && de.WrappedErr == nil:
 		return fmt.Sprintf("date_time: %s uuid: %s flow: %t call_trace: %s desc: %s", de.DateTime, de.UUID, de.Flow, de.CallTrace, de.Desc)
-	case de.Flow:
-		return de.Desc
+	case de.Flow && de.WrappedErr != nil:
+		return fmt.Sprintf("uuid: %s desc: %s error: %s", de.UUID, de.Desc, de.WrappedErr.Error())
+	case de.Flow && de.WrappedErr == nil:
+		return fmt.Sprintf("uuid: %s desc: %s", de.UUID, de.Desc)
 	default:
 		return ""
 	}
@@ -113,7 +115,7 @@ func NewDetailedError(flow bool, callTrace string, wrappedErr error, errDescCons
 func IsNotNilThenLog(detailedErr *DetailedError) bool {
 	if detailedErr != nil {
 		if !detailedErr.logged {
-			log.Printf("\n%s", detailedErr.Error())
+			log.Println(detailedErr.Error())
 			detailedErr.logged = true
 		}
 		return true
