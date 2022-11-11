@@ -1,4 +1,4 @@
-package safekit
+package goroutinekit
 
 import (
 	"os"
