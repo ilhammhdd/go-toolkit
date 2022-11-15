@@ -75,8 +75,9 @@ func (de *DetailedError) IsWrappedErrNotNilThenLog() bool {
 }
 
 type flowStruct struct {
-	UUID string `json:"uuid"`
-	Desc string `json:"desc"`
+	UUID         string `json:"uuid"`
+	Desc         string `json:"desc"`
+	ErrDescConst uint   `json:"err_desc_const,omitempty"`
 }
 
 type nonFlowStruct struct {
@@ -92,7 +93,7 @@ type nonFlowStruct struct {
 
 func (de DetailedError) MarshalJSON() ([]byte, error) {
 	if de.Flow {
-		return json.Marshal(flowStruct{de.UUID, de.Desc})
+		return json.Marshal(flowStruct{de.UUID, de.Desc, de.ErrDescConst})
 	}
 	return json.Marshal(nonFlowStruct(de))
 }
