@@ -2,6 +2,7 @@ package sqlkit
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 type TxCmdStmtArgs struct {
@@ -13,41 +14,46 @@ type DBOperation struct {
 	DB *sql.DB
 }
 
-func (dbo DBOperation) TxCommand(txCmdStmtArgs []*TxCmdStmtArgs) ([]*sql.Result, []error) {
+func (dbo DBOperation) TxCommand(txCmdStmtArgs []*TxCmdStmtArgs) ([]*sql.Result, error) {
 	err := dbo.DB.Ping()
 	if err != nil {
-		return nil, []error{err}
+		return nil, err
 	}
 
 	tx, err := dbo.DB.Begin()
 	if err != nil {
-		return nil, []error{err}
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			return nil, fmt.Errorf("error begin tx: %s, error rollback tx: %s", err.Error(), rollbackErr.Error())
+		}
+		return nil, err
 	}
-	var txPreparedStmtErrs []error
-	var txExecErrs []error
 	var results []*sql.Result
 	for i := range txCmdStmtArgs {
 		preparedStmt, err := tx.Prepare(txCmdStmtArgs[i].Statement)
 		if err != nil {
-			txPreparedStmtErrs = append(txPreparedStmtErrs, err)
-		}
-		if len(txPreparedStmtErrs) > 0 {
-			break
+			rollbackErr := tx.Rollback()
+			if rollbackErr != nil {
+				return nil, fmt.Errorf("error prepare tx statement: %s, error rollback tx: %s", err.Error(), rollbackErr.Error())
+			}
+			return nil, err
 		}
 
 		result, err := preparedStmt.Exec(txCmdStmtArgs[i].Args...)
 		if err != nil {
-			txExecErrs = append(txExecErrs, err)
+			rollbackErr := tx.Rollback()
+			if rollbackErr != nil {
+				return nil, fmt.Errorf("error exec tx prepared statement: %s, error rollback tx: %s", err.Error(), rollbackErr.Error())
+			}
+			return nil, err
 		}
 		defer preparedStmt.Close()
-		if len(txExecErrs) > 0 {
-			break
-		}
 		results = append(results, &result)
 	}
 
-	if len(txPreparedStmtErrs) > 0 || len(txExecErrs) > 0 {
-		return nil, append(txPreparedStmtErrs, txExecErrs...)
+	err = tx.Commit()
+	if err != nil {
+		return nil, err
 	}
 
 	return results, nil
