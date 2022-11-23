@@ -4,8 +4,53 @@ import (
 	"database/sql"
 )
 
+type TxCmdStmtArgs struct {
+	Statement string
+	Args      []interface{}
+}
+
 type DBOperation struct {
 	DB *sql.DB
+}
+
+func (dbo DBOperation) TxCommand(txCmdStmtArgs []*TxCmdStmtArgs) ([]*sql.Result, []error) {
+	err := dbo.DB.Ping()
+	if err != nil {
+		return nil, []error{err}
+	}
+
+	tx, err := dbo.DB.Begin()
+	if err != nil {
+		return nil, []error{err}
+	}
+	var txPreparedStmtErrs []error
+	var txExecErrs []error
+	var results []*sql.Result
+	for i := range txCmdStmtArgs {
+		preparedStmt, err := tx.Prepare(txCmdStmtArgs[i].Statement)
+		if err != nil {
+			txPreparedStmtErrs = append(txPreparedStmtErrs, err)
+		}
+		if len(txPreparedStmtErrs) > 0 {
+			break
+		}
+
+		result, err := preparedStmt.Exec(txCmdStmtArgs[i].Args...)
+		if err != nil {
+			txExecErrs = append(txExecErrs, err)
+		}
+		defer preparedStmt.Close()
+		if len(txExecErrs) > 0 {
+			break
+		}
+		results = append(results, &result)
+	}
+
+	if len(txPreparedStmtErrs) > 0 || len(txExecErrs) > 0 {
+		return nil, append(txPreparedStmtErrs, txExecErrs...)
+	}
+
+	return results, nil
 }
 
 func (dbo DBOperation) Command(stmt string, args ...interface{}) (sql.Result, error) {
