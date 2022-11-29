@@ -29,7 +29,7 @@ func (dgf ErrDescGeneratorFunc) GenerateDesc(errorDescConst uint, args ...string
 type DetailedError struct {
 	DateTime time.Time
 	UUID     string
-	// Notating whether the cause is something from business flow or logic flow, or algorithmic one
+	// true if the error is caused by business flow or logic flow, false otherwise
 	Flow         bool
 	CallTrace    string
 	WrappedErr   error
@@ -113,13 +113,16 @@ func NewDetailedError(flow bool, callTrace string, wrappedErr error, errDescCons
 	return &DetailedError{time.Now().UTC(), uuidRand.String(), flow, callTrace, wrappedErr, errDescConst, descGenerator.GenerateDesc(errDescConst, args...), false}
 }
 
-func IsNotNilThenLog(detailedErr *DetailedError) bool {
-	if detailedErr != nil {
-		if !detailedErr.logged {
-			log.Println(detailedErr.Error())
-			detailedErr.logged = true
+func IsNotNilThenLog(detailedErrs ...*DetailedError) bool {
+	var notNilThenLog bool = false
+	for i := range detailedErrs {
+		if detailedErrs[i] != nil {
+			if !detailedErrs[i].logged {
+				log.Println(detailedErrs[i].Error())
+				detailedErrs[i].logged = true
+				notNilThenLog = true
+			}
 		}
-		return true
 	}
-	return false
+	return notNilThenLog
 }
